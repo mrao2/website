@@ -1,68 +1,55 @@
 name: Deploy to GitHub Pages
 
-on:
-  push:
-    branches: ['main']
-  workflow_dispatch:
+on:  
+  push:    
+    branches: [main]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      base_path: ${{ steps.base_path.outputs.value }}
+jobs:  
+  build_site:    
+    runs-on: ubuntu-latest    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      # If you're using pnpm, add this step then change the commands and cache key below to use `pnpm`     
+       # - name: Install pnpm      
+       #   uses: pnpm/action-setup@v3      
+       #   with:      
+       #     version: 8
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Install Node.js        
+        uses: actions/setup-node@v4        
+        with:          
+          node-version: 20          
           cache: npm
 
-      - name: Resolve base path
-        id: base_path
-        shell: bash
-        run: |
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          if [[ -f CNAME ]] || [[ "$REPO_NAME" == *.github.io ]]; then
-            echo "value=" >> "$GITHUB_OUTPUT"
-          else
-            echo "value=/$REPO_NAME" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Install dependencies        
+        run: npm install
 
-      - name: Install dependencies
-        run: npm ci
+      - name: build        
+        env:          
+          BASE_PATH: '/${{ github.event.repository.name }}'        
+        run: |          
+          npm run build
 
-      - name: Build
-        env:
-          BASE_PATH: ${{ steps.base_path.outputs.value }}
-        run: npm run build
+      - name: Upload Artifacts        
+        uses: actions/upload-pages-artifact@v3        
+        with:         
+           # this should match the `pages` option in your adapter-static options          
+           path: 'build/'
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build
-
-  deploy:
-    needs: build
+  deploy:    
+    needs: build_site    
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
+
+    permissions:      
+      pages: write      
+      id-token: write
+
+    environment:      
+      name: github-pages      
       url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+
+    steps:      
+      - name: Deploy        
+        id: deployment        
         uses: actions/deploy-pages@v4
