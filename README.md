@@ -1,34 +1,78 @@
-# website
+# mohithrao.me
 
-SvelteKit site configured for static deployment on GitHub Pages.
+Personal website built with SvelteKit, TypeScript, Vite, and Tailwind CSS.
 
-## Local development
+## Stack
+- SvelteKit v2 + Svelte 4
+- TypeScript
+- Tailwind CSS + PostCSS
+- Vite 5
 
-Install dependencies and run the dev server:
+## Routes
+- `/` Home
+- `/about` Resume-style About page
+- `/projects` Hidden in nav (implemented)
+- `/what-can-i-do-for-you` Hidden in nav (placeholder)
 
+Hidden pages are controlled by feature flags, not route deletion.
+
+## Getting Started
 ```bash
 npm install
 npm run dev
 ```
 
-## Build
-
-Create a production build:
-
+## Run Locally
+1. Install dependencies:
 ```bash
-npm run build
+npm install
 ```
+2. Start the dev server:
+```bash
+npm run dev
+```
+3. Open `http://localhost:5173` in your browser.
 
-## Deploy to GitHub Pages
+If port `5173` is in use, Vite will print the actual local URL in the terminal.
 
-The workflow at `.github/workflows/deploy.yml` deploys on every push to `main`.
+Useful scripts:
+- `npm run check` Type + Svelte checks
+- `npm run lint` Prettier check
+- `npm run format` Auto-format
+- `npm run build` Production build
+- `npm run preview` Preview production build
 
-Set GitHub repository settings:
+## Content Editing
+All site content is data-driven and lives in `src/lib/content/`:
+- `site.ts`: site name, tagline, description, email, social links, skills, education, resume path
+- `projects.ts`: projects array (`title`, `description`, `tags`, `links`, `featured`, `year`)
+- `experience.ts`: experience entries (`company`, `title`, `start`, `end`, `highlights`)
+- `certifications.ts`: certifications (`name`, `issuer`, `date`, `credentialUrl?`)
 
-1. Open `Settings` -> `Pages`.
-2. Under `Build and deployment`, set `Source` to `GitHub Actions`.
-3. Push to `main` to trigger deployment.
+## Feature Flags
+Use `src/lib/config/features.ts`:
+- `showProjectsPage`
+- `showServicesPage`
 
-Base path is set automatically:
-- Custom domain or `username.github.io` repo -> `/`
-- Project repo (`username/repo`) -> `/<repo>`
+Set either to `true` to show links in global navigation/footer contexts where applicable.
+Routes remain accessible directly even when hidden.
+
+## Components and Layout
+Reusable UI components are in `src/lib/components/`:
+- `Button.svelte`, `Badge.svelte`, `Card.svelte`, `Section.svelte`
+
+Global shell is in `src/routes/+layout.svelte` and includes:
+- Header + active nav state
+- Skip-to-content link
+- Persistent dark mode toggle
+- Footer with contact/social links
+
+## Static Assets
+- Resume PDF: `static/resume.pdf` (replace placeholder)
+- OpenGraph image: `static/og.png` (replace placeholder)
+- Favicon: `static/favicon.png`
+
+## SEO and Accessibility
+- Per-page `<svelte:head>` title + description + OpenGraph tags
+- Semantic headings and keyboard-focus states
+- Responsive layout for mobile and desktop
